@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 18, "column": 0}, "map": {"version":3,"sources":["file:///Users/shivamkumar/Desktop/chatapp/client/app/auth/login/page.tsx"],"sourcesContent":["\n\nimport Navbar from '@/components/Navbar'\nimport React from 'react'\n\nconst Login = () => {\n  return (\n    // <Navbar/>\n    <p>sndljsd</p>\n  )\n}\n\nexport default Login"],"names":[],"mappings":";;;;;;AAKA,MAAM,QAAQ;IACZ,OACE,YAAY;kBACZ,8OAAC;kBAAE;;;;;;AAEP;uCAEe"}}]
+}
