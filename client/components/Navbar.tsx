@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Menu, X, MessageCircle, ArrowRight } from 'lucide-react'
 import Button from './ui/Button'
 import Link from 'next/link'
+import Logo from './ui/Logo'
 
 
 const Navbar = () => {
@@ -18,12 +19,7 @@ const Navbar = () => {
       <nav className='flex justify-center items-center px-4 lg:px-6 py-4'>
         <div className='flex items-center justify-between w-full max-w-7xl'>
           {/* Logo */}
-          <Link href={"/"} className='flex items-center space-x-2 cursor-pointer'>
-            <MessageCircle className='w-7 h-7 text-blue-500' />
-            <span className='text-2xl font-bold text-blue-500'>
-              ChatApp
-            </span>
-          </Link>
+          <Logo/>
 
           {/* Desktop Navigation */}
           <ul className='hidden md:flex items-center space-x-8'>  
