@@ -71,13 +71,11 @@ export const authOptions: AuthOptions = {
         const url = isSignup ? `auth/signup` : `auth/login`;
 
         try {
-          console.log("Sending request to:", `${process.env.BACKEND_BASE_URL}/api/${url}`);
           const res = await api.post(`${process.env.BACKEND_BASE_URL}/api/${url}`, {
             username: credentials.username,
             email: credentials.email,
             password: credentials.password,
           });
-          console.log("API response:", res);
 
           if (!res || !res.data) return null;
 
@@ -92,11 +90,10 @@ export const authOptions: AuthOptions = {
             token: data.token,
           };
         } catch (error) {
-          console.error("Authentication error:", error);
           
           // Handle Axios errors properly
           if (error instanceof AxiosError) {
-            console.log("error response data:", error.response?.data);
+
             const errorMessage = 
               error.response?.data?.message || 
               error.response?.data?.error || 
