@@ -16,19 +16,21 @@ const authMiddleware = async (req, res, next) => {
     const decoded = await decodeAuthToken(token);
     console.log(decoded)
 
-    if (!decoded?.success || !decoded?.decoded?.id) {
+    if (!decoded?.success) {
       return res.status(401).json({ success: false, message: 'Unauthorized - Invalid token' });
     }
 
-    const user = await User.findById(decoded.decoded.id);
+    const user = await User.findById(decoded.token.id);
 
     if (!user) {
       return res.status(401).json({ success: false, message: 'Unauthorized - User not found' });
     }
 
     req.user = user;
+    console.log("Authenticated user:", req.user);
     next();
   } catch (err) {
+    console.log(err)
     return res.status(401).json({ success: false, message: 'Unauthorized - Token error' });
   }
 };
