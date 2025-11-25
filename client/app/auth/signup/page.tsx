@@ -7,8 +7,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useToast } from "@/context/ToastContext";
 
-const Login = () => {
+const Signup = () => {
   const [formData, setFormData] = useState({
+    username: "",
     email: "",
     password: "",
   });
@@ -19,6 +20,11 @@ const Login = () => {
 
   const validate = () => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (!formData.username) {
+      error("Username is required");
+      return false;
+    }
 
     if (!formData.email) {
       error("Email is required");
@@ -48,28 +54,29 @@ const Login = () => {
     try {
       const response = await signIn("credentials", {
         redirect: false,
+        username: formData.username,
         email: formData.email,
         password: formData.password,
-        isSignup: "false",
+        isSignup: "true",
       });
 
       if (response?.error) {
-        error(response.error || "Login failed. Please try again.");
+        error(response.error || "Registration failed. Please try again.");
         setLoading(false);
         return;
       }
 
       if (!response?.ok) {
-        error("Invalid email or password");
+        error("Registration failed. Please try again.");
         setLoading(false);
         return;
       }
 
-      success("Login successful!");
+      success("Registration successful!");
       router.push("/chat");
     } catch (err) {
-      error("Login failed. Please try again.");
-      console.error("Login failed:", err);
+      error("Registration failed. Please try again.");
+      console.error("Registration failed:", err);
     } finally {
       setLoading(false);
     }
@@ -89,8 +96,25 @@ const Login = () => {
           onSubmit={handleSubmit}
         >
           <h1 className="text-2xl font-semibold text-black text-center">
-            Welcome Back
+            Get Started
           </h1>
+
+          {/* Username */}
+          <div className="flex flex-col gap-2">
+            <label htmlFor="username" className="text-gray-700 font-medium">
+              Username
+            </label>
+            <input
+              type="text"
+              placeholder="John Snow"
+              id="username"
+              className="border border-gray-400 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors"
+              value={formData.username}
+              onChange={(e) =>
+                setFormData({ ...formData, username: e.target.value })
+              }
+            />
+          </div>
 
           {/* Email */}
           <div className="flex flex-col gap-2">
@@ -127,7 +151,7 @@ const Login = () => {
           </div>
 
           <Button
-            text={loading ? "Logging in..." : "Login"}
+            text={loading ? "Registering user..." : "Get Started"}
             classname={`w-full py-3 rounded-lg shadow-sm hover:shadow-lg cursor-pointer transform hover:scale-105 font-semibold ${
               loading ? "opacity-60 cursor-not-allowed" : ""
             }`}
@@ -135,9 +159,9 @@ const Login = () => {
           />
 
           <p className="text-sm text-gray-600 text-center">
-            Don&apos;t have an account?{" "}
-            <Link href="/auth/signup" className="text-blue-500 hover:underline">
-              Signup
+            Already have an account?{" "}
+            <Link href="/auth/login" className="text-blue-500 hover:underline">
+              Login
             </Link>
           </p>
         </form>
@@ -146,4 +170,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signup;

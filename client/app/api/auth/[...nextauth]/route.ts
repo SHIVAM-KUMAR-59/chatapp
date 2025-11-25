@@ -3,12 +3,13 @@ import NextAuth, { AuthOptions, User } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import { Session } from "next-auth";
 import api from "@/utils/axios";
+import { AxiosError } from "axios";
 
 interface LoginResponse {
   user: {
     id: string;
     email: string;
-    name: string;
+    username: string;
   };
   token: string;
 }
@@ -16,7 +17,7 @@ interface LoginResponse {
 interface CustomUser extends User {
   id: string;
   email: string;
-  name: string;
+  username: string;
   token: string;
 }
 
@@ -27,14 +28,14 @@ declare module "next-auth" {
     user: {
       id: string;
       email: string;
-      name: string;
+      username: string;
     };
   }
 
   interface User {
     id: string;
     email: string;
-    name: string;
+    username: string;
     token?: string;
   }
 }
@@ -44,7 +45,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     id?: string;
     email?: string;
-    name?: string;
+    username?: string;
     accessToken?: string;
   }
 }
@@ -54,6 +55,7 @@ export const authOptions: AuthOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
+        username: { label: "Name", type: "text", placeholder: "John Doe" },
         email: { label: "Email", type: "text", placeholder: "email@example.com" },
         password: { label: "Password", type: "password" },
         isSignup: { label: "Is Signup", type: "text" }, // "true" | "false"
@@ -64,13 +66,18 @@ export const authOptions: AuthOptions = {
 
         const isSignup = credentials.isSignup === "true";
 
+        if (isSignup && !credentials.username) return null;
+
         const url = isSignup ? `auth/signup` : `auth/login`;
 
         try {
-          const res = await api.post(`http://localhost:8000/api/${url}`, {
+          console.log("Sending request to:", `${process.env.BACKEND_BASE_URL}/api/${url}`);
+          const res = await api.post(`${process.env.BACKEND_BASE_URL}/api/${url}`, {
+            username: credentials.username,
             email: credentials.email,
             password: credentials.password,
           });
+          console.log("API response:", res);
 
           if (!res || !res.data) return null;
 
@@ -81,12 +88,26 @@ export const authOptions: AuthOptions = {
           return {
             id: data.user.id,
             email: data.user.email,
-            name: data.user.name,
+            username: data.user.username,
             token: data.token,
           };
         } catch (error) {
           console.error("Authentication error:", error);
-          return null;
+          
+          // Handle Axios errors properly
+          if (error instanceof AxiosError) {
+            console.log("error response data:", error.response?.data);
+            const errorMessage = 
+              error.response?.data?.message || 
+              error.response?.data?.error || 
+              error.message || 
+              "Authentication failed";
+            
+            throw new Error(errorMessage);
+          }
+          
+          // Handle other errors
+          throw new Error("Something went wrong during authentication");
         }
       },
     }),
@@ -102,20 +123,20 @@ export const authOptions: AuthOptions = {
       if (user) {
         token.id = user.id;
         token.email = user.email;
-        token.name = user.name;
+        token.username = (user as CustomUser).username;
         token.accessToken = (user as CustomUser).token;
       }
       return token;
     },
 
     async session({ session, token }: { session: Session; token: JWT }) {
-      if (token.id && token.email && token.name) {
+      if (token.id && token.email && token.username) {
         session.user.id = token.id;
         session.user.email = token.email;
-        session.user.name = token.name;
+        session.user.username = token.username;
       }
       if (token.accessToken) {
-        session.accessToken = token.accessToken;
+        session.accessToken = token.accessToken as string;
       }
       return session;
     },

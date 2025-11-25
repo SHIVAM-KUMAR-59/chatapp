@@ -14,7 +14,7 @@ const Page = () => {
         return <div>Please log in to access the chat.</div>;
     }
   return (
-    <p>ncsljdn</p>
+    <p> Hello {session?.user.email}</p>
   )
 }
 
