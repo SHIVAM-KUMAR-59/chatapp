@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState, useTransition } from "react"
+import {  useEffect, useState, useTransition } from "react"
 import { Menu } from "lucide-react"
 import Logo from "@/components/ui/Logo"
 import Sidebar from "@/components/chat/Sidebar"
@@ -16,7 +16,6 @@ export default function ChatInterface() {
 
   const activeTab = (searchParams.get("tab") || "chats") as "chats" | "friends" | "account"
   const selectedChatId = searchParams.get("chatId")
-  const searchQuery = searchParams.get("search") || ""
 
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
@@ -29,7 +28,7 @@ export default function ChatInterface() {
     { id: 4, name: "David Brown", avatar: "DB" },
     { id: 5, name: "Emma Davis", avatar: "ED" },
   ]
-  const friends = chats
+
   const selectedChat = chats.find((c) => c.id === Number.parseInt(selectedChatId || ""))
   const messages = selectedChat
     ? [
@@ -71,9 +70,6 @@ export default function ChatInterface() {
     }
   }
 
-  const handleSearchChange = (query: string) => {
-    updateURL({ tab: "friends", search: query || null })
-  }
 
   const handleSendMessage = (message: string) => {
     console.log("Sending message:", message)
@@ -83,6 +79,7 @@ export default function ChatInterface() {
     console.log("Logging out")
     // Add signOut from next-auth here
   }
+
 
   useEffect(() => {
   const handleEsc = (e: KeyboardEvent) => {
@@ -113,13 +110,10 @@ export default function ChatInterface() {
         <Sidebar
           activeTab={activeTab}
           selectedChatId={selectedChatId}
-          searchQuery={searchQuery}
           chats={chats}
-          friends={friends}
           sidebarOpen={sidebarOpen}
           onTabChange={handleTabChange}
           onChatSelect={handleChatSelect}
-          onSearchChange={handleSearchChange}
           onLogout={handleLogout}
         />
 

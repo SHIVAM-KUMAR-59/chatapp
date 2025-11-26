@@ -2,6 +2,9 @@
 
 import { MessageCircle, Users, UserCircle, LogOut, Plus } from "lucide-react"
 import Logo from "@/components/ui/Logo"
+import api from "@/utils/axios"
+import { use, useEffect, useRef, useState } from "react"
+import { getAvatar } from "@/utils/util"
 
 interface Chat {
   id: number
@@ -12,31 +15,79 @@ interface Chat {
 interface ChatSidebarProps {
   activeTab: "chats" | "friends" | "account"
   selectedChatId: string | null
-  searchQuery: string
   chats: Chat[]
-  friends: Chat[]
   sidebarOpen: boolean
   onTabChange: (tab: "chats" | "friends" | "account") => void
   onChatSelect: (chat: Chat) => void
-  onSearchChange: (query: string) => void
   onLogout: () => void
 }
 
 const Sidebar = ({
   activeTab,
   selectedChatId,
-  searchQuery,
   chats,
-  friends,
   sidebarOpen,
   onTabChange,
   onChatSelect,
-  onSearchChange,
   onLogout,
 }: ChatSidebarProps) => {
-  const filteredFriends = friends.filter((f) => 
-    f.name.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+
+  const [userData, setUserData] = useState({
+    friends: []
+  })
+  const [search, setSearch] = useState("")
+  const [searchedData, setSearchedData] = useState([])
+  const [searching, setSearching] = useState<boolean>(false)
+
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  const onSearchChangeInternal = (query: string) => {
+    setSearch(query);
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    // If query is empty → clear & return
+    if (!query.trim()) {
+      debounceRef.current = null;
+      return;
+    }
+
+    // Set new debounce timer
+    debounceRef.current = setTimeout(async () => {
+      try {
+        setSearching(true)
+        const res = await api.get(`/user/search?query=${query}`);
+        console.log("Search result:", res.data);
+        if(res.data.success) {
+          setSearchedData(res.data.data);
+        }
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setSearching(false)
+      }
+    }, 400); // debounce delay
+  };
+
+  
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const res = await api.get("/user/friends")
+        console.log(res.data)
+        const data = res.data
+        if(data.success) {
+          setUserData({...userData, friends: data.friends} )
+        }
+      } catch (err) {
+        console.log(err)
+      }
+    }
+    
+    fetchUserData()
+  }, [])
+
+  console.log("Search query in sidebar:", search)
 
   return (
     <div
@@ -106,12 +157,12 @@ const Sidebar = ({
           <div className="p-4 space-y-4">
             <input
               placeholder="Search friends"
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
+              value={search}
+              onChange={(e) => onSearchChangeInternal(e.target.value)}
               className="w-full px-4 py-2 border rounded-lg focus:ring-1 focus:ring-black focus:outline-none"
             />
 
-            {filteredFriends.length > 0 ? filteredFriends.map((friend) => (
+            {!search ? userData.friends.length > 0 ? userData.friends.map((friend) => (
               <div
                 key={friend.id}
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 cursor-pointer"
@@ -126,6 +177,25 @@ const Sidebar = ({
               <>
                 <p className="text-center text-gray-500 mt-10">No friends found. Search for a friend to start a conversation!</p>
               </>
+            ) : (
+              searching ? (
+                <p className="text-center text-gray-500 mt-10">Searching...</p>
+              ) : (
+                searchedData.length > 0 ? searchedData.map((user) => (
+                <div
+                  key={user._id}
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 cursor-pointer"
+                  onClick={() => onChatSelect(user)}
+                >
+                  <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-semibold">
+                    {getAvatar(user.username)}
+                  </div>
+                  <h3 className="font-medium text-gray-900">{user.username}</h3>
+                </div>
+              )) : (
+                <p className="text-center text-gray-500 mt-10">No users found for &quot;{search}&quot;.</p>
+              )
+              )
             )}
           </div>
         )}
