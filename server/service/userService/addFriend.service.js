@@ -1,3 +1,4 @@
+import Chat from '../../model/chat.model.js';
 import User from '../../model/user.model.js';
 import { ApiError, handleServerError } from '../../util/error.util.js';
 
@@ -14,6 +15,13 @@ const addFriendService = async (user, friendId) => {
 
         user.friends.push(friendId);
         friend.friends.push(user._id);
+
+        const newChat = {
+            participants: [user._id, friendId],
+            messages: []
+        }
+
+        await Chat.create(newChat);
         await user.save();
         await friend.save();
         return true;

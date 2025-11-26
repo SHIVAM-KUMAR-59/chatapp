@@ -3,26 +3,8 @@
 import { useState } from "react"
 import { Send } from "lucide-react"
 
-interface Message {
-  id: number
-  sender: "me" | "them"
-  text: string
-  time: string
-}
 
-interface Chat {
-  id: number
-  name: string
-  avatar: string
-}
-
-interface ChatWindowProps {
-  selectedChat: Chat
-  messages: Message[]
-  onSendMessage: (message: string) => void
-}
-
-const ChatWindow = ({ selectedChat, messages, onSendMessage }: ChatWindowProps) => {
+const ChatWindow = ({ selectedChatId, messages, onSendMessage }) => {
   const [message, setMessage] = useState("")
 
   const handleSend = () => {
@@ -31,16 +13,24 @@ const ChatWindow = ({ selectedChat, messages, onSendMessage }: ChatWindowProps) 
     setMessage("")
   }
 
+  const fetchMessages = async (chatId: string) => {
+
+  }
+
   return (
     <>
       {/* Desktop Chat Header */}
       <div className="p-4 border-b hidden items-center justify-between bg-white md:flex">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-semibold">
-            {selectedChat.avatar}
+            {/* {selectedChat.avatar} */}
+            AB
           </div>
           <div>
-            <h2 className="font-semibold text-gray-900">{selectedChat.name}</h2>
+            <h2 className="font-semibold text-gray-900">
+              {/* {selectedChat.name} */}
+              AB
+            </h2>
           </div>
         </div>
       </div>

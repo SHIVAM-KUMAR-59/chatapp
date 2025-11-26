@@ -8,7 +8,7 @@ import { PlusCircle, ArrowRight } from "lucide-react"
 import { User } from "@/types/types"
 
 interface FriendsListProps {
-  onChatSelect: (user: User) => void
+  onChatSelect: (userId: string) => void
 }
 
 const FriendsList = ({ onChatSelect }: FriendsListProps) => {
@@ -98,7 +98,7 @@ const FriendsList = ({ onChatSelect }: FriendsListProps) => {
             <div
               key={friend._id}
               className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 cursor-pointer"
-              onClick={() => onChatSelect(friend)}
+              onClick={() => onChatSelect(friend._id)}
             >
               <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-semibold">
                 {getAvatar(friend.username)}
@@ -122,7 +122,7 @@ const FriendsList = ({ onChatSelect }: FriendsListProps) => {
             <div
               key={user._id}
               className="flex items-center justify-between gap-3 p-3 rounded-lg hover:bg-gray-100 cursor-pointer"
-              onClick={() => !me && onChatSelect(user)}
+              onClick={() => !me && onChatSelect(user._id)}
             >
               <div className="flex items-center gap-3 justify-center">
                 <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-semibold">

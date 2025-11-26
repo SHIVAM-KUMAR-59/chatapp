@@ -10,37 +10,21 @@ import AccountView from "@/components/chat/AccountView"
 import EmptyState from "@/components/chat/EmptyState"
 import { useSession } from "next-auth/react"
 import { useToast } from "@/context/ToastContext"
+import api from "@/utils/axios"
 
 export default function ChatInterface() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [, startTransition] = useTransition()
   const { error } = useToast()
+  const { data: session } = useSession()
 
   const { status } = useSession()
 
-  const activeTab = (searchParams.get("tab") || "chats") as "chats" | "friends" | "account"
+  const activeTab = (searchParams.get("tab") || "friends") as "friends" | "explore" | "account"
   const selectedChatId = searchParams.get("chatId")
 
   const [sidebarOpen, setSidebarOpen] = useState(false)
-
-  // Mock data
-  const user = { id: "1", username: "John Doe", email: "john@example.com" }
-  const chats = [
-    { id: 1, name: "Alice Johnson", avatar: "AJ" },
-    { id: 2, name: "Bob Smith", avatar: "BS" },
-    { id: 3, name: "Carol White", avatar: "CW" },
-    { id: 4, name: "David Brown", avatar: "DB" },
-    { id: 5, name: "Emma Davis", avatar: "ED" },
-  ]
-
-  const selectedChat = chats.find((c) => c.id === Number.parseInt(selectedChatId || ""))
-  const messages = selectedChat
-    ? [
-        { id: 1, sender: "them" as const, text: "Hey! How are you?", time: "10:30 AM" },
-        { id: 2, sender: "me" as const, text: "I'm good! You?", time: "10:32 AM" },
-      ]
-    : []
 
   const updateURL = (params: Record<string, string | null>) => {
     const current = new URLSearchParams(Array.from(searchParams.entries()))
@@ -61,15 +45,15 @@ export default function ChatInterface() {
     })
   }
 
-  const handleTabChange = (tab: "chats" | "friends" | "account") => {
+  const handleTabChange = (tab: "friends" | "explore" | "account") => {
     updateURL({ tab, chatId: null, search: null })
     if (tab === "account" && window.innerWidth < 768) {
       setSidebarOpen(false)
     }
   }
 
-  const handleChatSelect = (chat: any) => {
-    updateURL({ tab: "chats", chatId: chat.id.toString() })
+  const handleChatSelect = (userId: string) => {
+    updateURL({ tab: "friends", chatId: userId })
     if (window.innerWidth < 768) {
       setSidebarOpen(false)
     }
@@ -78,6 +62,40 @@ export default function ChatInterface() {
 
   const handleSendMessage = (message: string) => {
     console.log("Sending message:", message)
+  }
+
+  const [chatList, setChatList] = useState([])
+    // Fetch Friends
+  const fetchFriends = async () => {
+    try {
+      const res = await api.get("/user/friends")
+      console.log(res.data)
+      if (res.data.success) {
+        setChatList(res.data.friends)
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  useEffect(() => {
+    fetchFriends()
+  }, [])
+
+  const onRemoveFriend = async (e: React.FormEvent, userId: string) => {
+    e.stopPropagation()
+    try {
+      const res = await api.post(`/user//remove-friend`, { friendId: userId })
+      if (res.data.success) {
+        setChatList((prev) => prev.filter((chat: any) => chat._id !== userId))
+        if (selectedChatId === userId) {
+          updateURL({ chatId: null })
+        }
+        await fetchFriends()
+      }
+    } catch (err) {
+      console.log(err)
+    }
   }
 
 
@@ -119,10 +137,11 @@ export default function ChatInterface() {
         <Sidebar
           activeTab={activeTab}
           selectedChatId={selectedChatId}
-          chats={chats}
+          chats={chatList}
           sidebarOpen={sidebarOpen}
           onTabChange={handleTabChange}
           onChatSelect={handleChatSelect}
+          onRemoveFriend={onRemoveFriend}
         />
 
         {/* Main Panel */}
@@ -136,12 +155,16 @@ export default function ChatInterface() {
               <Menu className="w-6 h-6" />
             </button>
             
-            {selectedChat ? (
+            {selectedChatId ? (
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-semibold text-sm">
-                  {selectedChat.avatar}
+                  {/* {selectedChat.avatar} */}
+                  AB
                 </div>
-                <span className="font-semibold text-gray-900">{selectedChat.name}</span>
+                <span className="font-semibold text-gray-900">
+                  {/* {selectedChat.name} */}
+                  AB
+                  </span>
               </div>
             ) : (
               <Logo />
@@ -152,11 +175,11 @@ export default function ChatInterface() {
 
           {/* Content */}
           {activeTab === "account" ? (
-            <AccountView user={user} />
-          ) : selectedChat ? (
+            <AccountView user={session?.user} />
+          ) : selectedChatId ? (
             <ChatWindow 
-              selectedChat={selectedChat} 
-              messages={messages}
+              selectedChat={selectedChatId} 
+              messages={[]}
               onSendMessage={handleSendMessage}
             />
           ) : (

@@ -5,20 +5,16 @@ import Logo from "@/components/ui/Logo"
 import ChatList from "./ChatList"
 import FriendsList from "./FriendsList"
 import { signOut } from "next-auth/react"
-
-interface Chat {
-  id: number
-  name: string
-  avatar: string
-}
+import { User } from "@/types/types"
 
 interface ChatSidebarProps {
-  activeTab: "chats" | "explore" | "account"
+  activeTab: "friends" | "explore" | "account"
   selectedChatId: string | null
-  chats: Chat[]
+  chats: User[]
   sidebarOpen: boolean
-  onTabChange: (tab: "chats" | "explore" | "account") => void
-  onChatSelect: (chat: Chat) => void
+  onTabChange: (tab: "friends" | "explore" | "account") => void
+  onChatSelect: (chatId: string) => void
+  onRemoveFriend: (e: React.FormEvent, userId: string) => void
 }
 
 const Sidebar = ({
@@ -28,6 +24,7 @@ const Sidebar = ({
   sidebarOpen,
   onTabChange,
   onChatSelect,
+  onRemoveFriend,
 }: ChatSidebarProps) => {
   
   const onLogout = async () => {
@@ -58,12 +55,12 @@ const Sidebar = ({
       {/* Tabs */}
       <div className="flex">
         {[
-          { id: "chats", icon: <MessageCircle className="w-4 h-4 text-blue-600 mt-1" />, label: "Chats" },
+          { id: "friends", icon: <MessageCircle className="w-4 h-4 text-blue-600 mt-1" />, label: "Friends" },
           { id: "explore", icon: <Users className="w-4 h-4 text-blue-600 mt-1" />, label: "Explore" },
         ].map((tab) => (
           <button
             key={tab.id}
-            onClick={() => onTabChange(tab.id as "chats" | "account" | "explore")}
+            onClick={() => onTabChange(tab.id as "friends" | "account" | "explore")}
             className={`flex-1 py-3 flex justify-center gap-2 font-medium transition-colors ${
               activeTab === tab.id 
                 ? "text-black border-b-2 border-black" 
@@ -78,11 +75,12 @@ const Sidebar = ({
 
       {/* Sidebar Content */}
       <div className="flex-1 overflow-y-auto">
-        {activeTab === "chats" && (
+        {activeTab === "friends" && (
           <ChatList
             chats={chats}
             selectedChatId={selectedChatId}
             onChatSelect={onChatSelect}
+            onRemoveFriend={onRemoveFriend}
           />
         )}
 
