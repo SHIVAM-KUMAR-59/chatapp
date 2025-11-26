@@ -3,6 +3,7 @@ import getFriendsController from "../controller/userController/getFriends.contro
 import authMiddleware from "../middleware/auth.middleware.js";
 import searchController from "../controller/userController/search.controller.js";
 import addFriendController from "../controller/userController/addFriend.controller.js";
+import removeFriendController from "../controller/userController/removeFriend.controller.js";
 
 const router = Router();
 
@@ -10,5 +11,6 @@ router.use(authMiddleware)
 router.get("/friends", getFriendsController)
 router.get("/search", searchController)
 router.post("/add-friend", addFriendController)
+router.post("/remove-friend", removeFriendController)
 
 export default router

@@ -13,11 +13,11 @@ interface Chat {
 }
 
 interface ChatSidebarProps {
-  activeTab: "chats" | "friends" | "account"
+  activeTab: "chats" | "explore" | "account"
   selectedChatId: string | null
   chats: Chat[]
   sidebarOpen: boolean
-  onTabChange: (tab: "chats" | "friends" | "account") => void
+  onTabChange: (tab: "chats" | "explore" | "account") => void
   onChatSelect: (chat: Chat) => void
 }
 
@@ -59,11 +59,11 @@ const Sidebar = ({
       <div className="flex">
         {[
           { id: "chats", icon: <MessageCircle className="w-4 h-4 text-blue-600 mt-1" />, label: "Chats" },
-          { id: "friends", icon: <Users className="w-4 h-4 text-blue-600 mt-1" />, label: "Friends" },
+          { id: "explore", icon: <Users className="w-4 h-4 text-blue-600 mt-1" />, label: "Explore" },
         ].map((tab) => (
           <button
             key={tab.id}
-            onClick={() => onTabChange(tab.id as "chats" | "friends")}
+            onClick={() => onTabChange(tab.id as "chats" | "exlore" | "account")}
             className={`flex-1 py-3 flex justify-center gap-2 font-medium transition-colors ${
               activeTab === tab.id 
                 ? "text-black border-b-2 border-black" 
@@ -86,7 +86,7 @@ const Sidebar = ({
           />
         )}
 
-        {activeTab === "friends" && (
+        {activeTab === "explore" && (
           <FriendsList onChatSelect={onChatSelect} />
         )}
       </div>
