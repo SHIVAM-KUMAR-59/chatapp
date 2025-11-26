@@ -6,6 +6,7 @@ import api from "@/utils/axios"
 import { getAvatar } from "@/utils/util"
 import { PlusCircle, ArrowRight } from "lucide-react"
 import { User } from "@/types/types"
+import { useToast } from "@/context/ToastContext"
 
 interface FriendsListProps {
   onChatSelect: (userId: string) => void
@@ -18,6 +19,7 @@ const FriendsList = ({ onChatSelect }: FriendsListProps) => {
   const [search, setSearch] = useState("")
   const [searchedData, setSearchedData] = useState<User[]>([])
   const [searching, setSearching] = useState(false)
+  const { success, error } = useToast()
 
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -29,7 +31,7 @@ const FriendsList = ({ onChatSelect }: FriendsListProps) => {
         setFriends(res.data.friends)
       }
     } catch (err) {
-      console.log(err)
+      error("Error fetching friends")
     }
   }
 
@@ -56,7 +58,7 @@ const FriendsList = ({ onChatSelect }: FriendsListProps) => {
           setSearchedData(res.data.data)
         }
       } catch (err) {
-        console.log(err)
+        error("Error searching for friends")
       } finally {
         setSearching(false)
       }
@@ -72,9 +74,10 @@ const FriendsList = ({ onChatSelect }: FriendsListProps) => {
       if (res.data.success) {
         // Update local state instantly
         setFriends((prev) => [...prev, user])
+        success("Friend added successfully")
       }
     } catch (err) {
-      console.log(err)
+      error("Error adding friend")
     }
   }
 

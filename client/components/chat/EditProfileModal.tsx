@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import api from "@/utils/axios"
+import { useToast } from "@/context/ToastContext"
 
 interface UserProfile {
   username: string
@@ -17,6 +18,7 @@ interface EditProfileModalProps {
 export default function EditProfileModal({ open, onClose, onUpdated }: EditProfileModalProps) {
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const { success, error } = useToast()
 
   const [form, setForm] = useState<UserProfile>({
     username: "",
@@ -32,7 +34,7 @@ export default function EditProfileModal({ open, onClose, onUpdated }: EditProfi
         email: res.data.profile.email,
       })
     } catch (err) {
-      console.log(err)
+      error("Failed to fetch user profile")
     } finally {
       setLoading(false)
     }
@@ -42,11 +44,11 @@ export default function EditProfileModal({ open, onClose, onUpdated }: EditProfi
     try {
       setSaving(true)
       const res = await api.patch("/user/edit-profile", form)
-      console.log(res)
+      success("Profile updated successfully")
       onUpdated && onUpdated()
       onClose()
     } catch (err) {
-      console.log(err)
+      error("Failed to update profile")
     } finally {
       setSaving(false)
     }

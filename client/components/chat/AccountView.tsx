@@ -5,6 +5,7 @@ import api from "@/utils/axios"
 import EditProfileModal from "./EditProfileModal"
 import { getAvatar } from "@/utils/util"
 import { User } from "@/types/types"
+import { useToast } from "@/context/ToastContext"
 
 interface UserProfile {
   username: string
@@ -16,6 +17,7 @@ export default function AccountView() {
   const [loading, setLoading] = useState(false)
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [openModal, setOpenModal] = useState(false)
+  const { error } = useToast()
 
   const getUser = async () => {
     try {
@@ -23,7 +25,7 @@ export default function AccountView() {
       const res = await api.get("/user/profile")
       setUserProfile(res.data.profile)
     } catch (err) {
-      console.log(err)
+      error("Failed to fetch user profile")
     } finally {
       setLoading(false)
     }

@@ -18,7 +18,7 @@ export default function ChatInterface() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [, startTransition] = useTransition()
-  const { error } = useToast()
+  const { success, error } = useToast()
   const { data: session, status } = useSession()
   const socketRef = useRef(getSocket())
 
@@ -136,7 +136,7 @@ export default function ChatInterface() {
         setChatList(res.data.friends)
       }
     } catch (err) {
-      console.error("Error fetching friends:", err)
+      error("Error fetching friends")
     }
   }
 
@@ -154,10 +154,11 @@ export default function ChatInterface() {
           updateURL({ chatId: null })
           setChatData({ participants: null, messages: null })
         }
+        success("Friend removed successfully")
         await fetchFriends()
       }
     } catch (err) {
-      console.error("Error removing friend:", err)
+      error("Error removing friend")
     }
   }
 
