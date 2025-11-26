@@ -63,7 +63,7 @@ const Sidebar = ({
         ].map((tab) => (
           <button
             key={tab.id}
-            onClick={() => onTabChange(tab.id as "chats" | "exlore" | "account")}
+            onClick={() => onTabChange(tab.id as "chats" | "account" | "explore")}
             className={`flex-1 py-3 flex justify-center gap-2 font-medium transition-colors ${
               activeTab === tab.id 
                 ? "text-black border-b-2 border-black" 
