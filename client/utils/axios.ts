@@ -28,7 +28,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       await signOut({ redirect: false });
       // Redirect to signin page
-      window.location.href = '/auth/signin';
+      window.location.href = '/auth/login';
     }
     return Promise.reject(error);
   },

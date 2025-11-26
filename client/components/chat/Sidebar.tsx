@@ -1,10 +1,10 @@
 "use client"
 
-import { MessageCircle, Users, UserCircle, LogOut, Plus } from "lucide-react"
+import { MessageCircle, Users, UserCircle, LogOut } from "lucide-react"
 import Logo from "@/components/ui/Logo"
-import api from "@/utils/axios"
-import { use, useEffect, useRef, useState } from "react"
-import { getAvatar } from "@/utils/util"
+import ChatList from "./ChatList"
+import FriendsList from "./FriendsList"
+import { signOut } from "next-auth/react"
 
 interface Chat {
   id: number
@@ -19,7 +19,6 @@ interface ChatSidebarProps {
   sidebarOpen: boolean
   onTabChange: (tab: "chats" | "friends" | "account") => void
   onChatSelect: (chat: Chat) => void
-  onLogout: () => void
 }
 
 const Sidebar = ({
@@ -29,66 +28,17 @@ const Sidebar = ({
   sidebarOpen,
   onTabChange,
   onChatSelect,
-  onLogout,
 }: ChatSidebarProps) => {
-
-  const [userData, setUserData] = useState({
-    friends: []
-  })
-  const [search, setSearch] = useState("")
-  const [searchedData, setSearchedData] = useState([])
-  const [searching, setSearching] = useState<boolean>(false)
-
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
-
-  const onSearchChangeInternal = (query: string) => {
-    setSearch(query);
-
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-
-    // If query is empty → clear & return
-    if (!query.trim()) {
-      debounceRef.current = null;
-      return;
-    }
-
-    // Set new debounce timer
-    debounceRef.current = setTimeout(async () => {
-      try {
-        setSearching(true)
-        const res = await api.get(`/user/search?query=${query}`);
-        console.log("Search result:", res.data);
-        if(res.data.success) {
-          setSearchedData(res.data.data);
-        }
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setSearching(false)
-      }
-    }, 400); // debounce delay
-  };
-
   
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const res = await api.get("/user/friends")
-        console.log(res.data)
-        const data = res.data
-        if(data.success) {
-          setUserData({...userData, friends: data.friends} )
-        }
-      } catch (err) {
-        console.log(err)
-      }
-    }
-    
-    fetchUserData()
-  }, [])
-
-  console.log("Search query in sidebar:", search)
-
+  const onLogout = async () => {
+     try {
+      console.log("Signing out...")
+        await signOut()
+        window.location.href = '/auth/login';
+     } catch (error) {
+        console.error("Error during sign out:", error)
+     }
+  }
   return (
     <div
       id="sidebar"
@@ -129,75 +79,15 @@ const Sidebar = ({
       {/* Sidebar Content */}
       <div className="flex-1 overflow-y-auto">
         {activeTab === "chats" && (
-          <div>
-            {chats.length > 0 ? chats.map((chat) => (
-              <div
-                key={chat.id}
-                onClick={() => onChatSelect(chat)}
-                className={`p-4 cursor-pointer transition ${
-                  selectedChatId === chat.id.toString() 
-                    ? "bg-gray-100" 
-                    : "hover:bg-gray-50"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-semibold">
-                    {chat.avatar}
-                  </div>
-                  <h3 className="font-medium text-gray-900 truncate">{chat.name}</h3>
-                </div>
-              </div>
-            )) : (
-                <p className="p-4 text-center text-gray-500 mt-20">No chats available. Start a new conversation!</p>
-            )}
-          </div>
+          <ChatList
+            chats={chats}
+            selectedChatId={selectedChatId}
+            onChatSelect={onChatSelect}
+          />
         )}
 
         {activeTab === "friends" && (
-          <div className="p-4 space-y-4">
-            <input
-              placeholder="Search friends"
-              value={search}
-              onChange={(e) => onSearchChangeInternal(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-1 focus:ring-black focus:outline-none"
-            />
-
-            {!search ? userData.friends.length > 0 ? userData.friends.map((friend) => (
-              <div
-                key={friend.id}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 cursor-pointer"
-                onClick={() => onChatSelect(friend)}
-              >
-                <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-semibold">
-                  {friend.avatar}
-                </div>
-                <h3 className="font-medium text-gray-900">{friend.name}</h3>
-              </div>
-            )) : (
-              <>
-                <p className="text-center text-gray-500 mt-10">No friends found. Search for a friend to start a conversation!</p>
-              </>
-            ) : (
-              searching ? (
-                <p className="text-center text-gray-500 mt-10">Searching...</p>
-              ) : (
-                searchedData.length > 0 ? searchedData.map((user) => (
-                <div
-                  key={user._id}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 cursor-pointer"
-                  onClick={() => onChatSelect(user)}
-                >
-                  <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-semibold">
-                    {getAvatar(user.username)}
-                  </div>
-                  <h3 className="font-medium text-gray-900">{user.username}</h3>
-                </div>
-              )) : (
-                <p className="text-center text-gray-500 mt-10">No users found for &quot;{search}&quot;.</p>
-              )
-              )
-            )}
-          </div>
+          <FriendsList onChatSelect={onChatSelect} />
         )}
       </div>
 

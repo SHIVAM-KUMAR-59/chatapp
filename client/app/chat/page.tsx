@@ -8,11 +8,16 @@ import Sidebar from "@/components/chat/Sidebar"
 import ChatWindow from "@/components/chat/ChatWindow"
 import AccountView from "@/components/chat/AccountView"
 import EmptyState from "@/components/chat/EmptyState"
+import { useSession } from "next-auth/react"
+import { useToast } from "@/context/ToastContext"
 
 export default function ChatInterface() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [, startTransition] = useTransition()
+  const { error } = useToast()
+
+  const { status } = useSession()
 
   const activeTab = (searchParams.get("tab") || "chats") as "chats" | "friends" | "account"
   const selectedChatId = searchParams.get("chatId")
@@ -75,11 +80,15 @@ export default function ChatInterface() {
     console.log("Sending message:", message)
   }
 
-  const handleLogout = () => {
-    console.log("Logging out")
-    // Add signOut from next-auth here
-  }
 
+  useEffect(() => {
+    if(status === "unauthenticated") {
+      error("You must be logged in to access the chat.")
+      setTimeout(() => {
+        router.replace('/auth/login')
+      }, 2000)
+    }
+  }, [status, router])
 
   useEffect(() => {
   const handleEsc = (e: KeyboardEvent) => {
@@ -97,7 +106,7 @@ export default function ChatInterface() {
 
   return (
     <main className="bg-white">
-      <div className="flex h-screen bg-white max-w-7xl mx-auto">
+      {status === "authenticated" ? <div className="flex h-screen bg-white max-w-7xl mx-auto">
         {/* Overlay for mobile */}
         {sidebarOpen && (
           <div 
@@ -114,7 +123,6 @@ export default function ChatInterface() {
           sidebarOpen={sidebarOpen}
           onTabChange={handleTabChange}
           onChatSelect={handleChatSelect}
-          onLogout={handleLogout}
         />
 
         {/* Main Panel */}
@@ -155,7 +163,13 @@ export default function ChatInterface() {
             <EmptyState />
           )}
         </div>
-      </div>
+      </div> : (
+        status === "loading" ? <div className="flex items-center justify-center h-screen">
+          <p className="text-gray-500">Loading...</p>
+        </div> : <div className="flex items-center justify-center h-screen">
+          <p className="text-gray-500">Redirecting to login...</p>
+        </div>
+      )}
     </main>
   )
 }
