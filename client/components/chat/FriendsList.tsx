@@ -21,7 +21,7 @@ const FriendsList = ({ onChatSelect }: FriendsListProps) => {
 
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
 
-  // --- Fetch Friends ---
+  // Fetch Friends
   const fetchFriends = async () => {
     try {
       const res = await api.get("/user/friends")
@@ -37,7 +37,7 @@ const FriendsList = ({ onChatSelect }: FriendsListProps) => {
     fetchFriends()
   }, [])
 
-  // --- Debounced Search ---
+  // Debounced Search
   const onSearchChangeInternal = (query: string) => {
     setSearch(query)
 
@@ -63,7 +63,7 @@ const FriendsList = ({ onChatSelect }: FriendsListProps) => {
     }, 400)
   }
 
-  // --- Add Friend ---
+  // Add Friend
   const onAddClick = async (e: React.FormEvent, user: User) => {
     e.stopPropagation()
 
@@ -78,7 +78,6 @@ const FriendsList = ({ onChatSelect }: FriendsListProps) => {
     }
   }
 
-  // --- Helper: Check if user is already a friend ---
   const isFriend = (userId: string) => {
     return friends.some((f) => f._id === userId)
   }
@@ -93,7 +92,6 @@ const FriendsList = ({ onChatSelect }: FriendsListProps) => {
         className="w-full px-4 py-2 border rounded-lg focus:ring-1 focus:ring-black focus:outline-none"
       />
 
-      {/* --- IF search empty → show friends list --- */}
       {!search ? (
         friends.length > 0 ? (
           friends.map((friend) => (
@@ -136,7 +134,7 @@ const FriendsList = ({ onChatSelect }: FriendsListProps) => {
                 </h3>
               </div>
 
-              {/* --- Icons Logic --- */}
+
               {!me && (
                 friendAlready ? (
                   <ArrowRight className="w-5 h-5 text-gray-600" />
