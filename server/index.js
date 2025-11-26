@@ -5,6 +5,7 @@ import cors from "cors";
 import { DB_URL, PORT } from "./config/init.config.js";
 import connectDB from "./config/db.config.js";
 import apiRoutes from './route/api.route.js'
+import createMessageService from "./service/chatService/createMessage.service.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -24,8 +25,12 @@ app.use(apiRoutes)
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);
 
-  socket.on("send_message", (data) => {
-    socket.broadcast.emit("receive_message", data);
+  socket.on("send_message", async (data) => {
+    const created = await createMessageService(data)
+    if(created) {
+      socket.broadcast.emit("receive_message", created);
+      console.log("Message sent successfully")
+    }
   });
 
   socket.on("disconnect", () => {
