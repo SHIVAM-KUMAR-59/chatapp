@@ -281,7 +281,7 @@ export default function ChatInterface() {
 
             {/* Content */}
             {activeTab === "account" ? (
-              <AccountView user={session?.user} />
+              <AccountView/>
             ) : selectedChatId ? (
               <ChatWindow 
                 chatData={chatData}
