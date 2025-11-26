@@ -12,7 +12,7 @@ import { useSession } from "next-auth/react"
 import { useToast } from "@/context/ToastContext"
 import api from "@/utils/axios"
 import { getSocket } from "@/utils/socket"
-import { ChatData, Message } from "@/types/types"
+import { ChatData, Message, User } from "@/types/types"
 
 export default function ChatInterface() {
   const router = useRouter()
@@ -149,7 +149,7 @@ export default function ChatInterface() {
     try {
       const res = await api.post(`/user/remove-friend`, { friendId: userId })
       if (res.data.success) {
-        setChatList((prev) => prev.filter((chat: any) => chat._id !== userId))
+        setChatList((prev) => prev.filter((chat: User) => chat._id !== userId))
         if (selectedChatId === userId) {
           updateURL({ chatId: null })
           setChatData({ participants: null, messages: null })
