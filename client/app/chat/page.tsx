@@ -25,6 +25,11 @@ export default function ChatInterface() {
   const selectedChatId = searchParams.get("chatId")
 
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [chatData, setChatData] = useState({
+    participants: null,
+    messages: null
+  })
+  const [fetchingMessages, setFetchingMessages] = useState(false)
 
   const updateURL = (params: Record<string, string | null>) => {
     const current = new URLSearchParams(Array.from(searchParams.entries()))
@@ -52,11 +57,27 @@ export default function ChatInterface() {
     }
   }
 
-  const handleChatSelect = (userId: string) => {
+  const fetchMessages = async (userId: string) => {
+    try {
+      setFetchingMessages(true)
+      const res = await api.get(`/chat/messages/${userId}`)
+      setChatData({
+        messages: res.data.messages.messages,
+        participants: res.data.messages.participants
+    });
+    } catch (err) {
+      console.log(err)
+    } finally {
+      setFetchingMessages(false)
+    }
+  }
+
+  const handleChatSelect = async (userId: string) => {
     updateURL({ tab: "friends", chatId: userId })
     if (window.innerWidth < 768) {
       setSidebarOpen(false)
     }
+    await fetchMessages(userId)
   }
 
 
@@ -85,7 +106,7 @@ export default function ChatInterface() {
   const onRemoveFriend = async (e: React.FormEvent, userId: string) => {
     e.stopPropagation()
     try {
-      const res = await api.post(`/user//remove-friend`, { friendId: userId })
+      const res = await api.post(`/user/remove-friend`, { friendId: userId })
       if (res.data.success) {
         setChatList((prev) => prev.filter((chat: any) => chat._id !== userId))
         if (selectedChatId === userId) {
@@ -178,9 +199,10 @@ export default function ChatInterface() {
             <AccountView user={session?.user} />
           ) : selectedChatId ? (
             <ChatWindow 
-              selectedChat={selectedChatId} 
-              messages={[]}
+              chatData={chatData}
               onSendMessage={handleSendMessage}
+              fetchingMessages={fetchingMessages}
+              currentUsername={session?.user.username}
             />
           ) : (
             <EmptyState />

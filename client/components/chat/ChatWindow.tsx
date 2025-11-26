@@ -2,9 +2,25 @@
 
 import { useState } from "react"
 import { Send } from "lucide-react"
+import { getAvatar } from "@/utils/util"
 
+interface ChatWindowProps {
+  chatData: {
+    participants: {
+      username: string
+    }[] | null
+    messages: {
+      _id: string
+      sender: string
+      text: string
+    }[] | null
+  }
+  onSendMessage: (message: string) => void
+  fetchingMessages: boolean
+  currentUsername: string | undefined
+}
 
-const ChatWindow = ({ selectedChatId, messages, onSendMessage }) => {
+const ChatWindow: React.FC<ChatWindowProps> = ({ chatData, onSendMessage, fetchingMessages, currentUsername }) => {
   const [message, setMessage] = useState("")
 
   const handleSend = () => {
@@ -13,32 +29,30 @@ const ChatWindow = ({ selectedChatId, messages, onSendMessage }) => {
     setMessage("")
   }
 
-  const fetchMessages = async (chatId: string) => {
-
-  }
-
   return (
     <>
       {/* Desktop Chat Header */}
       <div className="p-4 border-b hidden items-center justify-between bg-white md:flex">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-semibold">
-            {/* {selectedChat.avatar} */}
-            AB
+            {chatData && chatData.messages && chatData.participants && chatData.participants.length > 0 ? getAvatar(chatData.participants[0].username) : null}
           </div>
           <div>
             <h2 className="font-semibold text-gray-900">
-              {/* {selectedChat.name} */}
-              AB
+              {chatData && chatData.messages && chatData.participants && chatData.participants.length > 0
+                ? (chatData.participants[0].username === currentUsername
+                    ? (chatData.participants.length > 1 ? chatData.participants[1].username : "")
+                    : chatData.participants[0].username)
+                : ""}
             </h2>
           </div>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
-        {messages.map((msg) => (
-          <div key={msg.id} className={`flex ${msg.sender === "me" ? "justify-end" : ""}`}>
+      {!fetchingMessages ? <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
+        {chatData && chatData.messages && chatData.messages.map((msg) => (
+          <div key={msg._id} className={`flex ${msg.sender === "me" ? "justify-end" : ""}`}>
             <div
               className={`max-w-md px-4 py-2 rounded-2xl ${
                 msg.sender === "me" 
@@ -53,7 +67,9 @@ const ChatWindow = ({ selectedChatId, messages, onSendMessage }) => {
             </div>
           </div>
         ))}
-      </div>
+      </div> : <div className=" bg-gray-50 min-h-[90vh] flex items-center justify-center">
+            <p className="text-gray-500">Loading messages...</p>
+      </div>}
 
       {/* Input */}
       <div className="p-4 border-t bg-white flex gap-2">

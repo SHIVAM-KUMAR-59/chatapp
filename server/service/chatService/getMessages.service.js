@@ -13,13 +13,18 @@ const getMessagesService = async (user, otherUserId) => {
             throw new ApiError(403, 'You are not friends with this user');
         }
 
-        const messages = await Chat.find({
+        const chat = await Chat.findOne({
             participants: { $all: [user._id, otherUserId] }
-        }).populate('username').sort({ createdAt: 1 });
+        }).populate('participants', 'username');
+
+        if(!chat) {
+            return [];
+        }
         
-        return messages;
+        return {participants: chat.participants, messages: chat.messages};
     } catch (error) {
-        handleError(error);
+        console.log(error);
+        handleServerError(error);
     }
 }
 

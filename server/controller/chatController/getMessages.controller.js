@@ -1,7 +1,7 @@
 import getMessagesService from '../../service/chatService/getMessages.service.js';
 
 const getMessagesController = async (req, res, next) => {
-    const { userId } = req.params;
+    const { userId: otherUserId } = req.params;
     if(!otherUserId) {
         return res.status(400).json({message: 'Other user ID is required'});
     }

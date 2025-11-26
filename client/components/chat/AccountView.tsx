@@ -7,10 +7,17 @@ interface User {
 }
 
 interface AccountViewProps {
-  user: User
+  user: User | undefined
 }
 
 const AccountView = ({ user }: AccountViewProps) => {
+  if(!user) {
+    return (
+      <div className="min-h-screen felx justify-center items-center">
+        <p className="text-2xl text-gray-500">Fetching User Details...</p>
+      </div>
+    )
+  }
   return (
     <div className="flex-1 flex flex-col items-center justify-center text-center px-6 bg-gray-50">
       <div className="w-24 h-24 rounded-full bg-blue-500 text-white flex items-center justify-center text-3xl font-bold mb-4">
