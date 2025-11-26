@@ -4,9 +4,8 @@ import { useEffect, useRef, useState } from "react"
 import { useSession } from "next-auth/react"
 import api from "@/utils/axios"
 import { getAvatar } from "@/utils/util"
-import { PlusCircle } from "lucide-react"
+import { PlusCircle, ArrowRight } from "lucide-react"
 import { User } from "@/types/types"
-
 
 interface FriendsListProps {
   onChatSelect: (user: User) => void
@@ -15,32 +14,44 @@ interface FriendsListProps {
 const FriendsList = ({ onChatSelect }: FriendsListProps) => {
   const { data: session } = useSession()
 
-  const [userData, setUserData] = useState({
-    friends: []
-  })
+  const [friends, setFriends] = useState<User[]>([])
   const [search, setSearch] = useState("")
-  const [searchedData, setSearchedData] = useState([])
-  const [searching, setSearching] = useState<boolean>(false)
+  const [searchedData, setSearchedData] = useState<User[]>([])
+  const [searching, setSearching] = useState(false)
 
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
 
+  // --- Fetch Friends ---
+  const fetchFriends = async () => {
+    try {
+      const res = await api.get("/user/friends")
+      if (res.data.success) {
+        setFriends(res.data.friends)
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  useEffect(() => {
+    fetchFriends()
+  }, [])
+
+  // --- Debounced Search ---
   const onSearchChangeInternal = (query: string) => {
     setSearch(query)
 
     if (debounceRef.current) clearTimeout(debounceRef.current)
 
-    // If query is empty → clear & return
     if (!query.trim()) {
-      debounceRef.current = null
+      setSearchedData([])
       return
     }
 
-    // Set new debounce timer
     debounceRef.current = setTimeout(async () => {
       try {
         setSearching(true)
         const res = await api.get(`/user/search?query=${query}`)
-        console.log("Search result:", res.data)
         if (res.data.success) {
           setSearchedData(res.data.data)
         }
@@ -49,33 +60,32 @@ const FriendsList = ({ onChatSelect }: FriendsListProps) => {
       } finally {
         setSearching(false)
       }
-    }, 400) // debounce delay
+    }, 400)
   }
 
+  // --- Add Friend ---
   const onAddClick = async (e: React.FormEvent, user: User) => {
     e.stopPropagation()
-    console.log(user)
+
+    try {
+      const res = await api.post("/user/add-friend", { friendId: user._id })
+      if (res.data.success) {
+        // Update local state instantly
+        setFriends((prev) => [...prev, user])
+      }
+    } catch (err) {
+      console.log(err)
+    }
   }
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const res = await api.get("/user/friends")
-        console.log(res.data)
-        const data = res.data
-        if (data.success) {
-          setUserData({ friends: data.friends })
-        }
-      } catch (err) {
-        console.log(err)
-      }
-    }
-
-    fetchUserData()
-  }, [])
+  // --- Helper: Check if user is already a friend ---
+  const isFriend = (userId: string) => {
+    return friends.some((f) => f._id === userId)
+  }
 
   return (
     <div className="p-4 space-y-4">
+      {/* Search Input */}
       <input
         placeholder="Search friends"
         value={search}
@@ -83,9 +93,10 @@ const FriendsList = ({ onChatSelect }: FriendsListProps) => {
         className="w-full px-4 py-2 border rounded-lg focus:ring-1 focus:ring-black focus:outline-none"
       />
 
+      {/* --- IF search empty → show friends list --- */}
       {!search ? (
-        userData.friends.length > 0 ? (
-          userData.friends.map((friend: User) => (
+        friends.length > 0 ? (
+          friends.map((friend) => (
             <div
               key={friend._id}
               className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 cursor-pointer"
@@ -105,23 +116,40 @@ const FriendsList = ({ onChatSelect }: FriendsListProps) => {
       ) : searching ? (
         <p className="text-center text-gray-500 mt-10">Searching...</p>
       ) : searchedData.length > 0 ? (
-        searchedData.map((user: User) => (
-          <div
-            key={user._id}
-            className="flex items-center justify-between gap-3 p-3 rounded-lg hover:bg-gray-100 cursor-pointer"
-            onClick={() => onChatSelect(user)}
-          >
-            <div className="flex items-center gap-3 justify-center">
+        searchedData.map((user) => {
+          const me = user._id === session?.user.id
+          const friendAlready = isFriend(user._id)
+
+          return (
+            <div
+              key={user._id}
+              className="flex items-center justify-between gap-3 p-3 rounded-lg hover:bg-gray-100 cursor-pointer"
+              onClick={() => !me && onChatSelect(user)}
+            >
+              <div className="flex items-center gap-3 justify-center">
                 <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-semibold">
-                    {getAvatar(user.username)}
+                  {getAvatar(user.username)}
                 </div>
+
                 <h3 className="font-medium text-gray-900">
-                {user._id === session?.user.id ? "You" : user.username}
+                  {me ? "You" : user.username}
                 </h3>
+              </div>
+
+              {/* --- Icons Logic --- */}
+              {!me && (
+                friendAlready ? (
+                  <ArrowRight className="w-5 h-5 text-gray-600" />
+                ) : (
+                  <PlusCircle
+                    className="w-5 h-5 text-blue-600"
+                    onClick={(e) => onAddClick(e, user)}
+                  />
+                )
+              )}
             </div>
-            {user._id !== session?.user.id && <PlusCircle className="w-5 h-5 text-blue-600" onClick={(e) => onAddClick(e, user)} />}
-          </div>
-        ))
+          )
+        })
       ) : (
         <p className="text-center text-gray-500 mt-10">
           No users found for &quot;{search}&quot;.
