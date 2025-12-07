@@ -1,5 +1,5 @@
 'use client'
-import { ArrowRight, Zap, Shield, Users } from "lucide-react"
+import { ArrowRight, Zap } from "lucide-react"
 
 const HeroSection = () => {
   return (
@@ -35,7 +35,7 @@ const HeroSection = () => {
                   href="/auth/signup"
                   className="px-8 py-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-semibold text-lg flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30"
                 >
-                  Get Started Now
+                  Get Started Free
                   <ArrowRight className="w-5 h-5" />
                 </a>
                 <a
@@ -62,6 +62,7 @@ const HeroSection = () => {
                   </div>
                   <div>
                     <div className="font-semibold text-gray-900">Alice</div>
+                    <div className="text-xs text-gray-500">Online</div>
                   </div>
                 </div>
 
@@ -95,6 +96,7 @@ const HeroSection = () => {
                     </div>
                   </div>
                 </div>
+
               </div>
             </div>
           </div>
@@ -115,6 +117,8 @@ const HeroSection = () => {
           animation-delay: 2s;
         }
       `}</style>
+
+
     </div>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { Menu, X, MessageCircle, ArrowRight } from 'lucide-react'
+import { Menu, X, ArrowRight } from 'lucide-react'
 import Button from './ui/Button'
 import Link from 'next/link'
 import Logo from './ui/Logo'
@@ -8,7 +8,7 @@ import Logo from './ui/Logo'
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const navLinks = ['Home', 'About', 'Contact']
+  const navLinks = ['Home', 'Features']
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
@@ -36,9 +36,9 @@ const Navbar = () => {
           </ul>
 
           {/* Desktop Login Button */}
-          <div className='hidden md:block'>
-            <Button text='Login' icon={<ArrowRight className='w-4 h-4'/>} classname='rounded-lg shadow-sm hover:shadow-lg cursor-pointer transform hover:scale-105 font-semibold'/>
-          </div>
+          <Link href={'/auth/login'} className='hidden md:block'>
+            <Button text='Get Started' icon={<ArrowRight className='w-4 h-4'/>} classname='rounded-lg shadow-sm hover:shadow-lg cursor-pointer transform hover:scale-105 font-semibold'/>
+          </Link>
 
           {/* Mobile Menu Button */}
           <button
@@ -76,7 +76,9 @@ const Navbar = () => {
               </li>
             ))}
           </ul>
-          <Button text='Login' icon={<ArrowRight className='w-4 h-4'/>} classname='w-full mt-4 rounded-lg shadow-sm hover:shadow-lg cursor-pointer transform hover:scale-105 font-semibold'/>
+          <Link href={'/auth/login'}>
+            <Button text='Get Started' icon={<ArrowRight className='w-4 h-4'/>} classname='w-full mt-4 rounded-lg shadow-sm hover:shadow-lg cursor-pointer transform hover:scale-105 font-semibold'/>
+          </Link>
         </div>
       </div>
     </header>

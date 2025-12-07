@@ -1,8 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "@/components/ui/Button";
 import Logo from "@/components/ui/Logo";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useToast } from "@/context/ToastContext";
@@ -74,6 +74,24 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  const { status } = useSession()
+  // Authentication check
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push('/chat');
+    }
+  }, [status, router])
+
+  if(status === "loading") {
+    return (
+      <main>
+        <div className="flex items-center justify-center mt-20 w-full lg:max-w-5xl mx-auto px-6">
+          <p>Loading...</p>
+        </div>
+      </main>
+    )
+  }
 
   return (
     <main>
