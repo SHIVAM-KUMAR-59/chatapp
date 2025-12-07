@@ -2,7 +2,7 @@
 
 A modern, real-time chat application built with Next.js, Socket.IO, and MongoDB. Experience seamless communication with instant messaging, intuitive interface, and secure connections.
 
-![ChatApp Banner](https://via.placeholder.com/1200x400/3B82F6/FFFFFF?text=ChatApp+-+Real-time+Messaging)
+![ChatApp Banner](./banner.png)
 
 ## 📋 Table of Contents
 
