@@ -77,7 +77,6 @@ export default function ChatInterface() {
         })
       }
     } catch (err) {
-      console.error("Error fetching messages:", err)
       error("Failed to load messages")
     } finally {
       if (currentChatIdRef.current === userId) {
@@ -123,7 +122,6 @@ export default function ChatInterface() {
         chatData: chatData
       })
     } catch (err) {
-      console.error("Error sending message:", err)
       error("Failed to send message")
     }
   }
@@ -181,7 +179,6 @@ export default function ChatInterface() {
     }
 
     const handleReceiveMessage = (data: Message) => {
-      console.log("Received message:", data)
       
       // Only update if message is for current chat
       setChatData(prev => {

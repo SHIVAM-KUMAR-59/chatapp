@@ -7,10 +7,8 @@ const editProfileController = async (req, res, next) => {
     }
     try {
         const user = await editProfileService(req.user, { username, email });
-        console.log(res)
         return res.status(200).json({ success: true, user });
     } catch (err) {
-        console.log(err);
         next(err);
     }
 }

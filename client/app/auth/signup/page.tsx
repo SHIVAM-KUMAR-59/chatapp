@@ -76,7 +76,6 @@ const Signup = () => {
       router.push("/chat");
     } catch (err) {
       error("Registration failed. Please try again.");
-      console.error("Registration failed:", err);
     } finally {
       setLoading(false);
     }

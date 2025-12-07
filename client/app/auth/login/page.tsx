@@ -69,7 +69,6 @@ const Login = () => {
       router.push("/chat");
     } catch (err) {
       error("Login failed. Please try again.");
-      console.error("Login failed:", err);
     } finally {
       setLoading(false);
     }

@@ -29,11 +29,10 @@ const Sidebar = ({
   
   const onLogout = async () => {
      try {
-      console.log("Signing out...")
         await signOut()
         window.location.href = '/auth/login';
      } catch (error) {
-        console.error("Error during sign out:", error)
+        console.log(error)
      }
   }
   return (

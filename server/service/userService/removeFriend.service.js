@@ -17,7 +17,6 @@ const removeFriendService = async (user, friendId) => {
         await friend.save();
         return true;
     } catch (err) {
-        console.log(err)
         handleServerError(err);
     }
 }

@@ -14,7 +14,6 @@ const authMiddleware = async (req, res, next) => {
     }
 
     const decoded = await decodeAuthToken(token);
-    console.log(decoded)
 
     if (!decoded?.success) {
       return res.status(401).json({ success: false, message: 'Unauthorized - Invalid token' });
@@ -27,10 +26,8 @@ const authMiddleware = async (req, res, next) => {
     }
 
     req.user = user;
-    console.log("Authenticated user:", req.user);
     next();
   } catch (err) {
-    console.log(err)
     return res.status(401).json({ success: false, message: 'Unauthorized - Token error' });
   }
 };

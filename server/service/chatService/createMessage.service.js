@@ -36,7 +36,6 @@ const createMessageService = async ({ text, sender, chatData }) => {
       isRead: savedMessage.isRead
     }
   } catch (err) {
-    console.error("Error creating message:", err)
     return false
   }
 }

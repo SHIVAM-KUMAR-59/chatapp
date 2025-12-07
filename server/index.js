@@ -29,7 +29,6 @@ io.on("connection", (socket) => {
     const created = await createMessageService(data)
     if(created) {
       socket.broadcast.emit("receive_message", created);
-      console.log("Message sent successfully")
     }
   });
 

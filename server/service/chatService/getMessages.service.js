@@ -23,7 +23,6 @@ const getMessagesService = async (user, otherUserId) => {
         
         return {participants: chat.participants, messages: chat.messages};
     } catch (error) {
-        console.log(error);
         handleServerError(error);
     }
 }
